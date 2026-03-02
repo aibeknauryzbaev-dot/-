@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Қазақ базары — Монеталардың құны</title>
+    <style>
+        /* === ЖАЛПЫ СТИЛЬДЕР ЖӘНЕ ДИЗАЙН === */
+        :root {
+            --primary: #00B0C7; /* Көк түс (Ту түстес) */
+            --secondary: #FFD700; /* Алтын/Сары түс */
+            --bg-color: #Fdfbf7; /* Ашық фон */
+            --text-dark: #333333;
+            --success: #4CAF50;
+            --danger: #FF5252;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            user-select: none; /* Балалар байқаусызда мәтінді белгілеп алмауы үшін */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+            /* Қазақи өрнекті еске салатын қарапайым фондық стиль */
+            background-image: radial-gradient(var(--secondary) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-color: #fcf9f2;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 4px solid var(--primary);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- ЖОҒАРҒЫ ПАНЕЛЬ (СТАТИСТИКА) --- */
+        .header {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 4px solid var(--secondary);
+        }
+
+        .stars { color: var(--secondary); font-size: 1.5rem; letter-spacing: 2px; }
+
+        /* --- ОЙЫН АЙМАҒЫ --- */
+        .game-area {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .item-card {
+            background: #f0fcfd;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px dashed var(--primary);
+        }
+
+        .emoji-display {
+            font-size: 5rem;
+            margin: 10px 0;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        .item-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .price-tag {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: var(--text-dark);
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 10px 25px;
+            border-radius: 30px;
+            margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* --- МОНЕТАЛАР ЖӘНЕ ЕСЕПТЕУ --- */
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .total-sum { color: var(--success); font-size: 1.4rem; }
+        .remaining { color: var(--danger); }
+
+        .selected-coins-box {
+            min-height: 80px;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #fafafa;
+        }
+
+        /* --- БАТЫРМАЛАР (МОНЕТА ЖӘНЕ ӘРЕКЕТТЕР) --- */
+        .coin-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .coin-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFDF00, #DAA520);
+            border: 3px solid #B8860B;
+            color: #5c4300;
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #B8860B, 0 10px 10px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .coin-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 #B8860B, 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Кішкентай монета (таңдалғандар ішіндегі) */
+        .small-coin {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFDF00, #DAA520);
+            border: 2px solid #B8860B;
+            color: #5c4300;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .action-btn {
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .action-btn:active { transform: scale(0.95); }
+        .btn-check { background-color: var(--success); color: white; grid-column: span 2; font-size: 1.3rem; padding: 20px; box-shadow: 0 5px 0 #388E3C; }
+        .btn-check:active { box-shadow: 0 0 0 #388E3C; transform: translateY(5px); }
+        .btn-remove { background-color: #FFA726; color: white; box-shadow: 0 4px 0 #F57C00; }
+        .btn-clear { background-color: #EF5350; color: white; box-shadow: 0 4px 0 #D32F2F; }
+        .btn-next { background-color: var(--primary); color: white; grid-column: span 2; box-shadow: 0 4px 0 #008C9E; display: none; }
+
+        /* --- ХАБАРЛАМАЛАР --- */
+        .feedback-msg {
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 40px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            display: none;
+        }
+        .msg-success { background: #E8F5E9; color: #2E7D32; display: block; animation: popIn 0.5s; }
+        .msg-error { background: #FFEBEE; color: #C62828; display: block; animation: shake 0.4s; }
+        .msg-warning { background: #FFF8E1; color: #F57F17; display: block; }
+
+        /* --- ҚОРЫТЫНДЫ ЭКРАН --- */
+        #end-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .cup-emoji { font-size: 6rem; margin-bottom: 20px; }
+        .final-score { font-size: 2rem; color: var(--primary); margin: 20px 0; }
+        .btn-restart-game {
+            background-color: var(--secondary);
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #D4AF37;
+        }
+        .btn-restart-game:active { transform: translateY(5px); box-shadow: none; }
+
+        /* --- АНИМАЦИЯЛАР --- */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* --- МОБИЛЬДІ БЕЙІМДЕЛУ --- */
+        @media (max-width: 400px) {
+            .coin-btn { width: 60px; height: 60px; font-size: 1.5rem; }
+            .emoji-display { font-size: 4rem; }
+            .price-tag { font-size: 1.5rem; }
+            .header { font-size: 1rem; }
+            .action-btn { font-size: 1rem; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Жоғарғы статистика панелі -->
+        <div class="header" id="header-panel">
+            <div id="round-display">Раунд: 1/8</div>
+            <div id="score-display">Ұпай: 0</div>
+            <div class="stars" id="stars-display">☆☆☆</div>
+        </div>
+
+        <!-- Негізгі ойын экраны -->
+        <div id="game-screen" class="game-area">
+            
+            <div class="item-card">
+                <div class="item-name" id="item-name">Тауар</div>
+                <div class="emoji-display" id="item-emoji">📦</div>
+                <div class="price-tag" id="item-price">0 ₸</div>
+            </div>
+
+            <div class="info-panel">
+                <div>Жиналды: <br><span class="total-sum" id="current-sum">0 ₸</span></div>
+                <div id="remaining-box">Қалды: <br><span class="remaining" id="remaining-sum">0 ₸</span></div>
+            </div>
+
+            <div class="selected-coins-box" id="selected-coins-container">
+                <!-- Таңдалған монеталар осында түседі -->
+            </div>
+
+            <div class="feedback-msg" id="feedback-message"></div>
+
+            <div class="coin-buttons" id="coin-buttons-container">
+                <!-- Монета батырмалары JS арқылы қосылады -->
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn btn-remove" onclick="removeLastCoin()">↩️ Өшіру</button>
+                <button class="action-btn btn-clear" onclick="clearCoins()">🧹 Қайта бастау</button>
+                <button class="action-btn btn-check" id="btn-check" onclick="checkAnswer()">✅ Тексеру</button>
+                <button class="action-btn btn-next" id="btn-next" onclick="nextRound()">➡️ Келесі тауар</button>
+            </div>
+            
+        </div>
+
+        <!-- Ойын соңы экраны -->
+        <div id="end-screen">
+            <div class="cup-emoji">🏆</div>
+            <h1 id="end-title">Жарайсың!</h1>
+            <p id="end-message" style="font-size: 1.2rem; margin-top: 10px;">Сен монеталарды өте жақсы санайсың!</p>
+            <div class="final-score" id="final-score">Жинаған ұпайың: 0 / 8</div>
+            <div class="stars" id="final-stars" style="font-size: 3rem; margin-bottom: 30px;">★★★</div>
+            <button class="btn-restart-game" onclick="initGame()">🔄 Қайта ойнау</button>
+        </div>
+
+    </div>
+
+    <script>
+        /* =========================================================
+           МҰҒАЛІМГЕ АРНАЛҒАН БАПТАУЛАР (ОСЫ ЖЕРДЕН ӨЗГЕРТУГЕ БОЛАДЫ)
+           ========================================================= */
+        const GAME_CONFIG = {
+            maxRounds: 8,          // Ойын неше раундтан тұратыны (мысалы: 5, 8, 10)
+            minPrice: 1,           // Тауардың ең арзан бағасы (теңгемен)
+            maxPrice: 20,          // Тауардың ең қымбат бағасы (теңгемен)
+            coins: [1, 2, 5, 10],  // Экрандағы монеталар (қажет болса 20, 50 қосуға болады: [1, 2, 5, 10, 20])
+            
+            // Тауарлар тізімі (өзгертуге немесе жаңасын қосуға болады)
+            items: [
+                { name: "Бауырсақ", emoji: "🥐" },
+                { name: "Қымыз", emoji: "🥛" },
+                { name: "Шұбат", emoji: "🍶" },
+                { name: "Ірімшік", emoji: "🧀" },
+                { name: "Домбыра", emoji: "🪕" },
+                { name: "Киіз үй", emoji: "⛺" },
+                { name: "Тұмар", emoji: "🧿" },
+                { name: "Сақина", emoji: "💍" },
+                { name: "Құрт", emoji: "🥚" },
+                { name: "Қамшы", emoji: "🦯" }
+            ]
+        };
+
+        /* =========================================================
+           ОЙЫННЫҢ ІШКІ ЛОГИКАСЫ (БҰЛ ЖЕРДІ ӨЗГЕРТПЕГЕН ЖӨН)
+           ========================================================= */
+        let currentRound = 1;
+        let score = 0;
+        let targetPrice = 0;
+        let selectedCoinsArray = [];
+        let currentSum = 0;
+        let isAnswerChecked = false; // Тексеріліп қойғанын білу үшін
+
+        // HTML элементтерді айнымалыға сақтау
+        const ui = {
+            round: document.getElementById('round-display'),
+            score: document.getElementById('score-display'),
+            stars: document.getElementById('stars-display'),
+            itemName: document.getElementById('item-name'),
+            itemEmoji: document.getElementById('item-emoji'),
+            itemPrice: document.getElementById('item-price'),
+            currentSum: document.getElementById('current-sum'),
+            remainingSum: document.getElementById('remaining-sum'),
+            remainingBox: document.getElementById('remaining-box'),
+            coinsContainer: document.getElementById('selected-coins-container'),
+            coinButtons: document.getElementById('coin-buttons-container'),
+            feedback: document.getElementById('feedback-message'),
+            btnCheck: document.getElementById('btn-check'),
+            btnNext: document.getElementById('btn-next'),
+            gameScreen: document.getElementById('game-screen'),
+            endScreen: document.getElementById('end-screen'),
+            headerPanel: document.getElementById('header-panel')
+        };
+
+        // 1. Ойынды бастау
+        function initGame() {
+            currentRound = 1;
+            score = 0;
+            ui.gameScreen.style.display = 'block';
+            ui.endScreen.style.display = 'none';
+            ui.headerPanel.style.display = 'flex';
+            
+            setupCoinButtons();
+            startRound();
+        }
+
+        // Монета батырмаларын жасау (Баптауларға байланысты)
+        function setupCoinButtons() {
+            ui.coinButtons.innerHTML = '';
+            GAME_CONFIG.coins.forEach(val => {
+                const btn = document.createElement('button');
+                btn.className = 'coin-btn';
+                btn.innerText = val;
+                btn.onclick = () => addCoin(val);
+                ui.coinButtons.appendChild(btn);
+            });
+        }
+
+        // 2. Жаңа раундты бастау
+        function startRound() {
+            isAnswerChecked = false;
+            selectedCoinsArray = [];
+            currentSum = 0;
+            
+            // Кездейсоқ тауар мен бағаны таңдау
+            const randomItem = GAME_CONFIG.items[Math.floor(Math.random() * GAME_CONFIG.items.length)];
+            targetPrice = Math.floor(Math.random() * (GAME_CONFIG.maxPrice - GAME_CONFIG.minPrice + 1)) + GAME_CONFIG.minPrice;
+
+            // UI жаңарту
+            ui.itemName.innerText = randomItem.name;
+            ui.itemEmoji.innerText = randomItem.emoji;
+            ui.itemPrice.innerText = targetPrice + " ₸";
+            
+            ui.btnCheck.style.display = 'block';
+            ui.btnNext.style.display = 'none';
+            hideFeedback();
+            updateDashboard();
+            renderSelectedCoins();
+        }
+
+        // 3. Монета қосу
+        function addCoin(value) {
+            if (isAnswerChecked) return; // Егер дұрыс тапса, қосуды тоқтату
+            
+            selectedCoinsArray.push(value);
+            currentSum += value;
+            renderSelectedCoins();
+            hideFeedback(); // Жаңа әрекет жасалғанда ескі хабарламаны өшіру
+        }
+
+        // 4. Соңғы монетаны өшіру
+        function removeLastCoin() {
+            if (isAnswerChecked || selectedCoinsArray.length === 0) return;
+            
+            const removedValue = selectedCoinsArray.pop();
+            currentSum -= removedValue;
+            renderSelectedCoins();
+            hideFeedback();
+        }
+
+        // 5. Барлық монетаны сыпырып тастау (Қайта бастау)
+        function clearCoins() {
+            if (isAnswerChecked) return;
+            selectedCoinsArray = [];
+            currentSum = 0;
+            renderSelectedCoins();
+            hideFeedback();
+        }
+
+        // Экрандағы таңдалған монеталар мен сандарды жаңарту
+        function renderSelectedCoins() {
+            ui.coinsContainer.innerHTML = '';
+            selectedCoinsArray.forEach(val => {
+                const coinDiv = document.createElement('div');
+                coinDiv.className = 'small-coin';
+                coinDiv.innerText = val;
+                ui.coinsContainer.appendChild(coinDiv);
+            });
+
+            ui.currentSum.innerText = currentSum + " ₸";
+            
+            // Қалғанын немесе артығын есептеу
+            const diff = targetPrice - currentSum;
+            if (diff > 0) {
+                ui.remainingBox.innerHTML = `Қалды: <br><span class="remaining" style="color:var(--danger)">${diff} ₸</span>`;
+            } else if (diff < 0) {
+                ui.remainingBox.innerHTML = `Артық: <br><span class="remaining" style="color:#FFA726">${Math.abs(diff)} ₸</span>`;
+            } else {
+                ui.remainingBox.innerHTML = `Қалды: <br><span class="remaining" style="color:var(--success)">Дәл!</span>`;
+            }
+        }
+
+        // 6. Жауапты тексеру логикасы
+        function checkAnswer() {
+            if (selectedCoinsArray.length === 0) {
+                showFeedback("Алдымен монета таңда!", "msg-warning");
+                return;
+            }
+
+            if (currentSum === targetPrice) {
+                // Дәл тапты
+                showFeedback("Жарайсың! Дәл төледің! 🎉", "msg-success");
+                score++;
+                isAnswerChecked = true;
+                
+                // Батырмаларды ауыстыру
+                ui.btnCheck.style.display = 'none';
+                ui.btnNext.style.display = 'block';
+                updateDashboard();
+                
+            } else if (currentSum < targetPrice) {
+                // Жетіспейді
+                showFeedback("Әлі кем, тағы монета қос! ⬆️", "msg-warning");
+            } else {
+                // Артық кетті
+                showFeedback("Артық болды, бір монетаны өшіріп көр! ⬇️", "msg-error");
+            }
+        }
+
+        // 7. Келесі раундқа өту
+        function nextRound() {
+            if (currentRound >= GAME_CONFIG.maxRounds) {
+                endGame();
+            } else {
+                currentRound++;
+                startRound();
+            }
+        }
+
+        // Хабарлама көрсету
+        function showFeedback(text, className) {
+            ui.feedback.innerText = text;
+            ui.feedback.className = `feedback-msg ${className}`;
+        }
+
+        // Хабарламаны жасыру
+        function hideFeedback() {
+            ui.feedback.className = 'feedback-msg';
+            ui.feedback.style.display = 'none';
+        }
+
+        // Жоғарғы статистиканы (Раунд, Ұпай, Жұлдыз) жаңарту
+        function updateDashboard() {
+            ui.round.innerText = `Раунд: ${currentRound}/${GAME_CONFIG.maxRounds}`;
+            ui.score.innerText = `Ұпай: ${score}`;
+            
+            // Жұлдызша есептеу (әр 3 ұпай сайын 1 жұлдыз, барынша қарапайым)
+            let starsStr = "☆☆☆";
+            const percent = score / GAME_CONFIG.maxRounds;
+            if (percent >= 0.9) starsStr = "★★★";
+            else if (percent >= 0.5) starsStr = "★★☆";
+            else if (percent > 0) starsStr = "★☆☆";
+            
+            ui.stars.innerText = starsStr;
+        }
+
+        // 8. Ойынды аяқтау (Қорытынды экран)
+        function endGame() {
+            ui.gameScreen.style.display = 'none';
+            ui.headerPanel.style.display = 'none';
+            ui.endScreen.style.display = 'block';
+            
+            document.getElementById('final-score').innerText = `Жинаған ұпайың: ${score} / ${GAME_CONFIG.maxRounds}`;
+            
+            const percent = score / GAME_CONFIG.maxRounds;
+            const titleEl = document.getElementById('end-title');
+            const msgEl = document.getElementById('end-message');
+            const starsEl = document.getElementById('final-stars');
+
+            if (percent === 1) {
+                titleEl.innerText = "Керемет!";
+                msgEl.innerText = "Сен нағыз математиксің! Еш қателеспедің!";
+                starsEl.innerText = "★★★";
+            } else if (percent >= 0.5) {
+                titleEl.innerText = "Жақсы нәтиже!";
+                msgEl.innerText = "Сен монеталарды жақсы санайсың, бірақ әлі де жаттығуға болады.";
+                starsEl.innerText = "★★☆";
+            } else {
+                titleEl.innerText = "Тағы да байқап көр!";
+                msgEl.innerText = "Уайымдама, келесі жолы міндетті түрде жақсырақ шығады!";
+                starsEl.innerText = "★☆☆";
+            }
+        }
+
+        // Ойынды бет ашылғанда бірден бастау
+        window.onload = initGame;
+
+    </script>
+</body>
+</html>
