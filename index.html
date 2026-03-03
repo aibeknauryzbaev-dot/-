@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Қазақ базары — Жылдамдық сайысы</title>
+    <style>
+        /* === ЖАЛПЫ СТИЛЬДЕР ЖӘНЕ ДИЗАЙН === */
+        :root {
+            --primary: #00B0C7; /* 1-топ / Негізгі көк */
+            --team2: #FFA726;   /* 2-топ / Қызғылт сары */
+            --team3: #66BB6A;   /* 3-топ / Жасыл */
+            --secondary: #FFD700; 
+            --bg-color: #Fdfbf7;
+            --text-dark: #333333;
+            --success: #4CAF50;
+            --danger: #FF5252;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: #fcf9f2;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            background-image: radial-gradient(var(--secondary) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px; /* Көп тақта сыю үшін кеңейтілді */
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 4px solid var(--primary);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: max-width 0.3s;
+        }
+
+        /* --- ЖОҒАРҒЫ ПАНЕЛЬ (СТАТИСТИКА) --- */
+        .header {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 4px solid var(--secondary);
+        }
+
+        .multi-score { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .score-pill {
+            padding: 5px 15px;
+            border-radius: 12px;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* --- БІР УАҚЫТТА ОЙНАЙТЫН ТАҚТАЛАР --- */
+        .boards-container {
+            display: flex;
+            width: 100%;
+            padding: 10px;
+            gap: 15px;
+            background: #fafafa;
+        }
+
+        .team-board {
+            flex: 1;
+            border: 4px solid;
+            border-radius: 15px;
+            padding: 15px;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .board-title {
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            padding: 8px;
+            border-radius: 8px 8px 0 0;
+            margin: -15px -15px 15px -15px;
+            text-transform: uppercase;
+        }
+
+        .item-card {
+            background: #f8fcfd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px dashed;
+            text-align: center;
+        }
+
+        .emoji-display {
+            font-size: 4rem;
+            margin: 5px 0;
+            animation: bounce 2s infinite ease-in-out;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
+        }
+
+        .item-name { font-size: 1.2rem; font-weight: bold; }
+        .price-tag {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 5px 20px;
+            border-radius: 20px;
+            margin-top: 5px;
+        }
+
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .total-sum { color: var(--success); font-size: 1.2rem; }
+        .remaining { color: var(--danger); }
+
+        .selected-coins-box {
+            min-height: 60px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+            background: #fff;
+        }
+
+        /* --- БАТЫРМАЛАР --- */
+        .coin-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .coin-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFDF00, #DAA520);
+            border: 2px solid #B8860B;
+            color: #5c4300;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #B8860B, 0 5px 5px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        .coin-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #B8860B; }
+
+        .small-coin {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFDF00, #DAA520);
+            border: 2px solid #B8860B;
+            color: #5c4300;
+            font-size: 1rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: popIn 0.2s ease-out;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .action-btn {
+            padding: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.95); }
+        .btn-check { background-color: var(--success); grid-column: span 2; font-size: 1.1rem; padding: 15px; box-shadow: 0 4px 0 #388E3C; }
+        .btn-remove { background-color: #FFA726; box-shadow: 0 4px 0 #F57C00; }
+        .btn-clear { background-color: #EF5350; box-shadow: 0 4px 0 #D32F2F; }
+
+        /* Хабарламалар */
+        .feedback-msg {
+            font-size: 1rem; font-weight: bold; text-align: center;
+            min-height: 30px; margin-bottom: 10px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .msg-success { background: #E8F5E9; color: #2E7D32; animation: popIn 0.3s; }
+        .msg-error { background: #FFEBEE; color: #C62828; animation: shake 0.3s; }
+        .msg-warning { background: #FFF8E1; color: #F57F17; }
+
+        /* --- БАСТАПҚЫ ЖӘНЕ ҚОРЫТЫНДЫ ЭКРАН --- */
+        #setup-screen, #end-screen {
+            display: flex; flex-direction: column; align-items: center; padding: 40px 20px; text-align: center;
+        }
+        .team-btn {
+            background-color: var(--primary); color: white; font-size: 1.3rem; padding: 15px 30px;
+            margin: 10px; border: none; border-radius: 15px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 5px 0 #008C9E; width: 250px;
+        }
+        .team-btn:active { transform: translateY(5px); box-shadow: none; }
+        .team-btn.team-2 { background-color: var(--team2); box-shadow: 0 5px 0 #F57C00; }
+        .team-btn.team-3 { background-color: var(--team3); box-shadow: 0 5px 0 #388E3C; }
+
+        .cup-emoji { font-size: 5rem; margin-bottom: 10px; }
+        .btn-restart-game {
+            background-color: var(--secondary); color: var(--text-dark); font-size: 1.3rem;
+            padding: 15px 30px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 5px 0 #D4AF37; margin-top: 20px;
+        }
+        
+        /* Раунд жеңімпазын көрсететін экран */
+        #round-winner-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center;
+        }
+        .winner-box {
+            background: white; padding: 40px; border-radius: 20px; text-align: center;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 5px solid var(--secondary);
+        }
+
+        /* Анимациялар */
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        /* Мобильді бейімделу (Тар экрандарда тақталар асты-үсті орналасады) */
+        @media (max-width: 800px) {
+            .boards-container { flex-direction: column; }
+            .team-board { margin-bottom: 10px; }
+            .emoji-display { font-size: 3rem; }
+        }
+        
+        /* 3 топ болғанда кішірейту */
+        .boards-container[data-teams="3"] .coin-btn { width: 45px; height: 45px; font-size: 1.1rem; }
+        .boards-container[data-teams="3"] .emoji-display { font-size: 3rem; }
+        .boards-container[data-teams="3"] .price-tag { font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-container">
+        
+        <!-- Топтарды таңдау экраны -->
+        <div id="setup-screen">
+            <h1 style="color: var(--primary); margin-bottom: 10px;">Қазақ базары</h1>
+            <h2 style="color: var(--text-dark); margin-bottom: 30px;">Жылдамдық сайысы ⚡</h2>
+            <p style="font-size: 1.1rem; margin-bottom: 20px;">Барлық топ бір уақытта жарысады!</p>
+            <button class="team-btn" onclick="startGame(1)">👤 1 ойыншы</button>
+            <button class="team-btn team-2" onclick="startGame(2)">👥 2 топ жарысы</button>
+            <button class="team-btn team-3" onclick="startGame(3)">👨‍👩‍👦 3 топ жарысы</button>
+        </div>
+
+        <!-- Жоғарғы статистика панелі -->
+        <div class="header" id="header-panel" style="display: none;">
+            <div id="round-display">Раунд: 1/5</div>
+            <div class="multi-score" id="score-display"></div>
+        </div>
+
+        <!-- Негізгі ойын экраны (Тақталар осында түседі) -->
+        <div id="game-screen" style="display: none;">
+            <div class="boards-container" id="boards-container"></div>
+        </div>
+
+        <!-- Ойын соңы экраны -->
+        <div id="end-screen" style="display: none;">
+            <div class="cup-emoji">🏆</div>
+            <h1 id="end-title">Сайыс аяқталды!</h1>
+            <p id="end-message" style="font-size: 1.2rem; margin-top: 10px;"></p>
+            <div id="final-score" style="font-size: 1.3rem; line-height: 1.6; margin: 20px 0;"></div>
+            <button class="btn-restart-game" onclick="initGame()">🔄 Қайта ойнау</button>
+        </div>
+
+    </div>
+
+    <!-- Раунд жеңімпазын көрсететін терезе -->
+    <div id="round-winner-overlay">
+        <div class="winner-box">
+            <div style="font-size: 4rem;">⚡</div>
+            <h1 id="round-winner-text" style="color: var(--primary); font-size: 2.5rem; margin: 10px 0;"></h1>
+            <p style="font-size: 1.2rem; font-weight: bold; color: var(--success);">+1 ұпай</p>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================================
+           МҰҒАЛІМГЕ АРНАЛҒАН БАПТАУЛАР
+           ========================================================= */
+        const GAME_CONFIG = {
+            maxRounds: 5,          // Раунд саны
+            minPrice: 1,           
+            maxPrice: 20,          
+            coins: [1, 2, 5, 10],  
+            items: [
+                { name: "Бауырсақ", emoji: "🥐" }, { name: "Қымыз", emoji: "🥛" },
+                { name: "Шұбат", emoji: "🍶" }, { name: "Ірімшік", emoji: "🧀" },
+                { name: "Домбыра", emoji: "🪕" }, { name: "Киіз үй", emoji: "⛺" },
+                { name: "Тұмар", emoji: "🧿" }, { name: "Сақина", emoji: "💍" },
+                { name: "Құрт", emoji: "🥚" }, { name: "Қамшы", emoji: "🦯" }
+            ]
+        };
+
+        const TEAM_COLORS = ['#00B0C7', '#FFA726', '#66BB6A']; // Көк, Сары, Жасыл
+        const TEAM_NAMES = ['1-топ', '2-топ', '3-топ'];
+
+        let currentRound = 1;
+        let numTeams = 1;
+        let teamScores = [];
+        let teamsData = []; // Әр топтың өз тауары мен сомасы
+        let roundActive = false; // Біреу жеңгенде басқаларды тоқтату үшін
+
+        const ui = {
+            mainContainer: document.getElementById('main-container'),
+            setupScreen: document.getElementById('setup-screen'),
+            headerPanel: document.getElementById('header-panel'),
+            gameScreen: document.getElementById('game-screen'),
+            boardsContainer: document.getElementById('boards-container'),
+            endScreen: document.getElementById('end-screen'),
+            scoreDisplay: document.getElementById('score-display'),
+            roundDisplay: document.getElementById('round-display'),
+            overlay: document.getElementById('round-winner-overlay'),
+            overlayText: document.getElementById('round-winner-text')
+        };
+
+        function initGame() {
+            ui.setupScreen.style.display = 'flex';
+            ui.gameScreen.style.display = 'none';
+            ui.endScreen.style.display = 'none';
+            ui.headerPanel.style.display = 'none';
+            ui.overlay.style.display = 'none';
+        }
+
+        function startGame(count) {
+            numTeams = count;
+            currentRound = 1;
+            teamScores = new Array(numTeams).fill(0);
+            
+            // Экран енін топ санына қарай өзгерту
+            ui.mainContainer.style.maxWidth = numTeams > 1 ? '1100px' : '500px';
+            ui.boardsContainer.setAttribute('data-teams', numTeams);
+            
+            ui.setupScreen.style.display = 'none';
+            ui.gameScreen.style.display = 'block';
+            ui.headerPanel.style.display = 'flex';
+            
+            startRound();
+        }
+
+        // Жаңа раунд бастау: Әр топқа бөлек тауар беру
+        function startRound() {
+            roundActive = true;
+            teamsData = [];
+            ui.overlay.style.display = 'none';
+            
+            for(let i = 0; i < numTeams; i++) {
+                const randomItem = GAME_CONFIG.items[Math.floor(Math.random() * GAME_CONFIG.items.length)];
+                const targetPrice = Math.floor(Math.random() * (GAME_CONFIG.maxPrice - GAME_CONFIG.minPrice + 1)) + GAME_CONFIG.minPrice;
+                
+                teamsData.push({
+                    targetPrice: targetPrice,
+                    currentSum: 0,
+                    selectedCoins: [],
+                    item: randomItem,
+                    color: TEAM_COLORS[i],
+                    name: numTeams > 1 ? TEAM_NAMES[i] : 'Ойыншы'
+                });
+            }
+            
+            renderBoards();
+            updateDashboard();
+        }
+
+        // Экранға топтардың тақтасын сызу
+        function renderBoards() {
+            ui.boardsContainer.innerHTML = '';
+            
+            teamsData.forEach((team, index) => {
+                const board = document.createElement('div');
+                board.className = 'team-board';
+                board.style.borderColor = team.color;
+                
+                let titleHtml = numTeams > 1 ? `<div class="board-title" style="background:${team.color}">${team.name}</div>` : '';
+                
+                board.innerHTML = `
+                    ${titleHtml}
+                    <div class="item-card" style="border-color:${team.color}">
+                        <div class="item-name" style="color:${team.color}">${team.item.name}</div>
+                        <div class="emoji-display">${team.item.emoji}</div>
+                        <div class="price-tag">${team.targetPrice} ₸</div>
+                    </div>
+                    
+                    <div class="info-panel">
+                        <div>Жиналды:<br><span class="total-sum" id="sum-${index}">0 ₸</span></div>
+                        <div id="rem-${index}">Қалды:<br><span class="remaining" style="color:var(--danger)">${team.targetPrice} ₸</span></div>
+                    </div>
+                    
+                    <div class="selected-coins-box" id="coins-${index}"></div>
+                    <div class="feedback-msg" id="feedback-${index}"></div>
+                    
+                    <div class="coin-buttons">
+                        ${GAME_CONFIG.coins.map(val => `<button class="coin-btn" onclick="addCoin(${index}, ${val})">${val}</button>`).join('')}
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn btn-remove" onclick="removeLastCoin(${index})">↩️ Өшіру</button>
+                        <button class="action-btn btn-clear" onclick="clearCoins(${index})">🧹 Қайта</button>
+                        <button class="action-btn btn-check" onclick="checkAnswer(${index})">✅ Тексеру</button>
+                    </div>
+                `;
+                ui.boardsContainer.appendChild(board);
+            });
+        }
+
+        // Экрандағы деректерді жаңарту (монета қосқан кезде)
+        function updateBoardUI(index) {
+            const team = teamsData[index];
+            document.getElementById(`coins-${index}`).innerHTML = team.selectedCoins.map(val => `<div class="small-coin">${val}</div>`).join('');
+            document.getElementById(`sum-${index}`).innerText = team.currentSum + " ₸";
+            
+            const remBox = document.getElementById(`rem-${index}`);
+            const diff = team.targetPrice - team.currentSum;
+            
+            if (diff > 0) {
+                remBox.innerHTML = `Қалды:<br><span class="remaining" style="color:var(--danger)">${diff} ₸</span>`;
+            } else if (diff < 0) {
+                remBox.innerHTML = `Артық:<br><span class="remaining" style="color:#FFA726">${Math.abs(diff)} ₸</span>`;
+            } else {
+                remBox.innerHTML = `Қалды:<br><span class="remaining" style="color:var(--success)">Дәл!</span>`;
+            }
+        }
+
+        function addCoin(index, val) {
+            if (!roundActive) return;
+            teamsData[index].selectedCoins.push(val);
+            teamsData[index].currentSum += val;
+            hideFeedback(index);
+            updateBoardUI(index);
+        }
+
+        function removeLastCoin(index) {
+            if (!roundActive || teamsData[index].selectedCoins.length === 0) return;
+            const removed = teamsData[index].selectedCoins.pop();
+            teamsData[index].currentSum -= removed;
+            hideFeedback(index);
+            updateBoardUI(index);
+        }
+
+        function clearCoins(index) {
+            if (!roundActive) return;
+            teamsData[index].selectedCoins = [];
+            teamsData[index].currentSum = 0;
+            hideFeedback(index);
+            updateBoardUI(index);
+        }
+
+        // Ең басты логика: Кім бірінші дұрыс табады?
+        function checkAnswer(index) {
+            if (!roundActive) return;
+            const team = teamsData[index];
+
+            if (team.selectedCoins.length === 0) {
+                showFeedback(index, "Монета таңда!", "msg-warning");
+                return;
+            }
+
+            if (team.currentSum === team.targetPrice) {
+                // ЖЕҢІС (ОСЫ РАУНДТА)
+                roundActive = false; // Басқалар баса алмайды
+                teamScores[index]++;
+                updateDashboard();
+                
+                // Жеңімпазды үлкен экранда көрсету
+                ui.overlayText.style.color = team.color;
+                ui.overlayText.innerText = numTeams > 1 ? `${team.name} Жеңді!` : "Керемет! Дәл таптың!";
+                ui.overlay.style.display = 'flex';
+                
+                // 2.5 секундтан кейін келесі раундқа өту
+                setTimeout(() => {
+                    currentRound++;
+                    if (currentRound > GAME_CONFIG.maxRounds) {
+                        endGame();
+                    } else {
+                        startRound();
+                    }
+                }, 2500);
+
+            } else if (team.currentSum < team.targetPrice) {
+                showFeedback(index, "Әлі кем, қос! ⬆️", "msg-warning");
+            } else {
+                showFeedback(index, "Артық кетті! ⬇️", "msg-error");
+            }
+        }
+
+        function showFeedback(index, text, className) {
+            const fb = document.getElementById(`feedback-${index}`);
+            fb.innerText = text;
+            fb.className = `feedback-msg ${className}`;
+            fb.style.display = 'flex';
+        }
+        function hideFeedback(index) {
+            const fb = document.getElementById(`feedback-${index}`);
+            fb.style.display = 'none';
+        }
+
+        function updateDashboard() {
+            ui.roundDisplay.innerText = `Раунд: ${currentRound}/${GAME_CONFIG.maxRounds}`;
+            let scoreHtml = '';
+            for(let i=0; i<numTeams; i++) {
+                const name = numTeams > 1 ? TEAM_NAMES[i] : 'Ұпай';
+                scoreHtml += `<div class="score-pill" style="background:${TEAM_COLORS[i]}">${name}: ${teamScores[i]}</div>`;
+            }
+            ui.scoreDisplay.innerHTML = scoreHtml;
+        }
+
+        // Ойын қорытындысы
+        function endGame() {
+            ui.gameScreen.style.display = 'none';
+            ui.headerPanel.style.display = 'none';
+            ui.overlay.style.display = 'none';
+            ui.endScreen.style.display = 'flex';
+            ui.mainContainer.style.maxWidth = '600px'; // Қорытынды экранды жинақы ету
+            
+            const titleEl = document.getElementById('end-title');
+            const msgEl = document.getElementById('end-message');
+            const scoreEl = document.getElementById('final-score');
+
+            if (numTeams === 1) {
+                titleEl.innerText = "Ойын аяқталды!";
+                msgEl.innerText = "Сен монеталарды өте жылдам санайсың!";
+                scoreEl.innerHTML = `Жинаған ұпайың:<br><b>${teamScores[0]} / ${GAME_CONFIG.maxRounds}</b>`;
+            } else {
+                let maxScore = Math.max(...teamScores);
+                let winners = [];
+                for(let i=0; i<numTeams; i++) {
+                    if (teamScores[i] === maxScore) winners.push(TEAM_NAMES[i]);
+                }
+
+                if (winners.length === 1) {
+                    titleEl.innerText = `🏆 ${winners[0]} ЖЕҢІМПАЗ!`;
+                    msgEl.innerText = `Ең жылдам әрі ең дәл есептейтін топ!`;
+                } else {
+                    titleEl.innerText = `🤝 ТЕҢ ОЙЫН!`;
+                    msgEl.innerText = `Жеңімпаздар: ${winners.join(' және ')}`;
+                }
+
+                let finalScoresHtml = `Нәтиже:<br>`;
+                for(let i=0; i<numTeams; i++) {
+                    finalScoresHtml += `<div style="margin: 8px; padding: 10px; border-radius: 10px; background: ${TEAM_COLORS[i]}20; border-left: 5px solid ${TEAM_COLORS[i]};">
+                        <b>${TEAM_NAMES[i]}:</b> ${teamScores[i]} ұпай
+                    </div>`;
+                }
+                scoreEl.innerHTML = finalScoresHtml;
+            }
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
